@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cata & Emma XV</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+font-family:'Montserrat',sans-serif;
+background:url("fondo.jpg") center/cover no-repeat;
+min-height:100vh;
+color:#444;
+overflow-x:hidden;
+}
+
+/* HEADER */
+header{
+text-align:center;
+padding:110px 20px 10px;
+}
+
+h1{
+font-family:'Playfair Display',serif;
+font-size:64px;
+letter-spacing:5px;
+background:linear-gradient(180deg,#ffffff 0%,#d8d5d1 20%,#a8a39c 45%,#7f7a73 55%,#cfcac3 75%,#6f6a63 100%);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.sub{
+margin-top:12px;
+letter-spacing:3px;
+font-size:13px;
+color:#6f6a63;
+}
+
+/* BOTÓN */
+.boton{
+margin-top:30px;
+background:linear-gradient(180deg,#f7f6f4,#cfcac3,#9f9a93);
+color:#4f4b45;
+padding:14px 42px;
+border-radius:50px;
+cursor:pointer;
+display:inline-block;
+font-weight:500;
+box-shadow:0 6px 15px rgba(0,0,0,.15),inset 0 1px 3px rgba(255,255,255,.9),inset 0 -1px 2px rgba(0,0,0,.15);
+text-decoration:none;
+}
+
+input{display:none;}
+
+.boton-sec{
+display:block;
+margin-top:15px;
+font-size:13px;
+letter-spacing:2px;
+color:#6f6a63;
+text-decoration:underline;
+cursor:pointer;
+}
+
+/* CONTADOR */
+.contador{
+text-align:center;
+margin-top:20px;
+font-size:12px;
+letter-spacing:2px;
+color:#6f6a63;
+}
+
+/* 🔥 COLLAGE LIBRE (NO GRIDS RÍGIDOS) */
+.galeria{
+position:relative;
+width:100%;
+min-height:400px;
+padding:60px;
+}
+
+/* FOTO INCLINADA */
+.foto{
+position:relative;
+display:inline-block;
+background:white;
+padding:8px 8px 22px;
+box-shadow:0 15px 25px rgba(0,0,0,.15);
+margin:15px;
+transition:0.3s;
+}
+
+/* hover suave */
+.foto:hover{
+transform:scale(1.05) rotate(0deg) !important;
+z-index:10;
+}
+
+/* imagen real */
+.foto img{
+width:220px;
+height:auto;
+display:block;
+margin-bottom:10px;
+}
+
+/* caption */
+.caption{
+font-family:'Playfair Display',serif;
+font-size:14px;
+color:#6f6a63;
+text-align:center;
+}
+
+.caption span{
+display:block;
+font-size:12px;
+color:#9a958f;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Cata & Emma</h1>
+
+<div class="sub">COMPARTÍ TUS MOMENTOS FAVORITOS</div>
+
+<label class="boton">
+SUBIR FOTOS
+<input type="file" id="input" multiple>
+</label>
+
+<a href="https://drive.google.com/drive/folders/1k8o9FgETKQGouM1e739eneX6JkRoiXpW?usp=drive_link" target="_blank" class="boton-sec">
+ver fotos del evento
+</a>
+
+</header>
+
+<div class="contador" id="contador">0 FOTOS</div>
+<div class="galeria" id="galeria"></div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwgMnn2sXIKCssCtGA2cjNJmm_BOKqZt2t3xZpQcOqB3FvsDjvEkK4BhVevrKlnikkVIQ/exec";
+
+const input = document.getElementById("input")
+const galeria = document.getElementById("galeria")
+const contador = document.getElementById("contador")
+
+let total = 0
+
+function mensaje(texto){
+  const m = document.createElement("div")
+  m.textContent = texto
+  m.style.position = "fixed"
+  m.style.bottom = "20px"
+  m.style.left = "50%"
+  m.style.transform = "translateX(-50%)"
+  m.style.background = "white"
+  m.style.padding = "10px 20px"
+  m.style.borderRadius = "20px"
+  m.style.boxShadow = "0 5px 15px rgba(0,0,0,.2)"
+  m.style.fontSize = "13px"
+  document.body.appendChild(m)
+  setTimeout(()=>m.remove(),2500)
+}
+
+async function subir(base64, file){
+  for(let i=0;i<3;i++){
+    try{
+      await fetch(SCRIPT_URL,{
+        method:"POST",
+        body:new URLSearchParams({
+          file: base64,
+          mimeType: file.type,
+          fileName: file.name
+        })
+      })
+      return true
+    }catch{
+      await new Promise(r=>setTimeout(r,800))
+    }
+  }
+  return false
+}
+
+/* 🎲 POSICIONES ALEATORIAS AESTHETIC */
+function randomRotate(){
+  return (Math.random()*10 - 5).toFixed(2)
+}
+
+function randomTop(){
+  return Math.random()*40
+}
+
+function randomLeft(){
+  return Math.random()*80
+}
+
+input.addEventListener("change", async (e) => {
+  const files = [...e.target.files];
+
+  for (const file of files){
+
+    mensaje("Subiendo foto...")
+
+    const reader = new FileReader()
+
+    reader.onload = async function(ev){
+
+      const base64 = ev.target.result.split(",")[1]
+      const ok = await subir(base64, file)
+
+      if(ok){
+
+        const div = document.createElement("div")
+        div.className = "foto"
+
+        div.style.transform = `rotate(${randomRotate()}deg)`
+        div.style.zIndex = total
+
+        div.innerHTML = `
+          <img src="${ev.target.result}">
+          <div class="caption">
+            Cata & Emma
+            <span>30/05/26</span>
+          </div>
+        `
+
+        galeria.appendChild(div)
+
+        total++
+        contador.textContent = total + " FOTOS"
+
+        mensaje("Foto subida • Gracias por compartir")
+
+      }else{
+        mensaje("Error al subir • intentá de nuevo")
+      }
+    }
+
+    reader.readAsDataURL(file)
+  }
+})
+</script>
+
+</body>
+</html>
